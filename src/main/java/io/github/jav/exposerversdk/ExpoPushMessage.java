@@ -9,14 +9,17 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({"_debug"})
 public class ExpoPushMessage implements JsonSerializable {
 
     @JsonProperty("to")
-    public List<String> to = null;
+    public List<String> to;
     @JsonProperty("data")
     public Map<String, String> data = null;
     @JsonProperty("title")
@@ -61,7 +64,7 @@ public class ExpoPushMessage implements JsonSerializable {
     }
 
     public ExpoPushMessage(String _to) {
-        to = Arrays.asList(_to);
+        to = Collections.singletonList(_to);
     }
 
     @JsonProperty("to")
@@ -214,12 +217,11 @@ public class ExpoPushMessage implements JsonSerializable {
             jsonGenerator.writeStringField("channelId", channelId);
 
         jsonGenerator.writeEndObject();
-        return;
     }
 
     @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
+    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) {
         throw new UnsupportedOperationException("serializeWithType() not implemented.");
     }
-};
+}
 

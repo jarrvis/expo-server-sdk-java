@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,26 +16,18 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class PushClient {
-    static public final long PUSH_NOTIFICATION_CHUNK_LIMIT = 100;
-    static public final long PUSH_NOTIFICATION_RECEIPT_CHUNK_LIMIT = 300;
-    public URL baseApiUrl = null;
-    public PushServerResolver pushServerResolver = new DefaultPushServerResolver();
+    public static final long PUSH_NOTIFICATION_CHUNK_LIMIT = 100;
+    public static final long PUSH_NOTIFICATION_RECEIPT_CHUNK_LIMIT = 300;
+
+    private URI baseApiUrl = URI.create("https://exp.host/--/api/v2");
+    private final PushServerResolver pushServerResolver;
+
+    public PushClient(PushServerResolver pushServerResolver){
+        this.pushServerResolver = pushServerResolver;
+    }
 
     public PushClient() {
-        try {
-            baseApiUrl = new URL("https://exp.host/--/api/v2");
-        } catch (MalformedURLException e) {
-            //Will never fail
-        }
-    }
-
-    public URL getBaseApiUrl() {
-        return baseApiUrl;
-    }
-
-    public PushClient setBaseApiUrl(URL _baseApiUrl) {
-        baseApiUrl = _baseApiUrl;
-        return this;
+        this(new DefaultPushServerResolver());
     }
 
     public CompletableFuture<List<ExpoPushTicket>> sendPushNotificationsAsync(List<ExpoPushMessage> messages) {
@@ -110,7 +103,7 @@ public class PushClient {
     }
 
 
-    private class JsonReceiptHelper<T> {
+    private static class JsonReceiptHelper<T> {
         public List<T> ids;
         public JsonReceiptHelper(List<T> _ids) {
             ids = _ids;
@@ -118,7 +111,7 @@ public class PushClient {
     }
 
     private <T> CompletableFuture<String> _postReceiptsAsync(URL url, List<T> receipts) throws URISyntaxException {
-        JsonReceiptHelper<T> jsonReceiptHelper = new PushClient.JsonReceiptHelper<T>(receipts);
+        JsonReceiptHelper<T> jsonReceiptHelper = new JsonReceiptHelper<T>(receipts);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = null;
@@ -132,7 +125,7 @@ public class PushClient {
         return pushServerResolver.postAsync(url, json);
     }
 
-    static public boolean isExponentPushToken(String token) {
+    public static boolean isExponentPushToken(String token) {
         String prefixA = "ExponentPushToken[";
         String prefixB = "ExpoPushToken[";
         String postfix = "]";
@@ -164,7 +157,7 @@ public class PushClient {
             }
         }
 
-        if (chunk.size() > 0) {
+        if (!chunk.isEmpty()) {
             chunks.add(chunk);
         }
         return chunks;
@@ -192,7 +185,7 @@ public class PushClient {
                 }
             }
 
-            if (partialTo.size() > 0) {
+            if (!partialTo.isEmpty()) {
                 chunk.add(new ExpoPushMessage(partialTo, message));
             }
 
@@ -211,5 +204,13 @@ public class PushClient {
         }
 
         return chunks;
+    }
+
+    public URI getBaseApiUrl() {
+        return baseApiUrl;
+    }
+
+    public void setBaseApiUrl(URI _baseApiUrl) {
+        baseApiUrl = _baseApiUrl;
     }
 }

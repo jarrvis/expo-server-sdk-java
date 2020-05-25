@@ -2,11 +2,7 @@ package io.github.jav.exposerversdk;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,18 +11,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PushClientTest {
 
     @Test
-    public void apiBaseUrlIsOverridable() throws MalformedURLException {
+    public void apiBaseUriIsOverridable() {
         PushClient client = new PushClient();
-        URL apiUrl = client.getBaseApiUrl();
+        URI apiUrl = client.getBaseApiUrl();
         assertEquals(apiUrl, client.getBaseApiUrl());
-        URL mockBaseApiUrl = new URL("http://example.com/");
+        URI mockBaseApiUrl = URI.create("http://example.com/");
         client.setBaseApiUrl(mockBaseApiUrl);
         assertEquals(mockBaseApiUrl, client.getBaseApiUrl());
     }
@@ -59,15 +56,15 @@ class PushClientTest {
         List<ExpoPushMessage> messages = new ArrayList<>();
         messages.add(new ExpoPushMessage(Collections.nCopies(messagesLength, "?")));
         List<List<ExpoPushMessage>> chunks = client.chunkPushNotifications(messages);
-        chunks.stream().forEach(
-                (c) -> assertEquals(1, c.size())
+        chunks.forEach(
+                chunk -> assertEquals(1, chunk.size())
         );
         long totalMessageCount = _countAndValidateMessages(chunks);
         assertEquals(totalMessageCount, messagesLength);
     }
 
     @Test
-    public void canChunkSinglePushNotificatoinMessageWithSmallListsOfRecipients() {
+    public void canChunkSinglePushNotificationMessageWithSmallListsOfRecipients() {
         int messagesLength = 10;
         PushClient client = new PushClient();
         List<ExpoPushMessage> messages = new ArrayList<>();
@@ -263,8 +260,7 @@ class PushClientTest {
         PushServerResolver pushServerResolverMock = mock(PushServerResolver.class);
         when(pushServerResolverMock.postAsync(any(), any())).thenReturn(mockResponseFuture);
 
-        PushClient client = new PushClient();
-        client.pushServerResolver = pushServerResolverMock;
+        PushClient client = new PushClient(pushServerResolverMock);
 
         List<CompletableFuture<List<ExpoPushReceiept>>> messageRepliesFutures = new ArrayList<>();
         List<List<String>> receiptIdChunks = client.chunkPushNotificationReceiptIds(Arrays.asList("2011eb6d-d4d3-440c-a93c-37ac4b51ea09"));

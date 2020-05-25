@@ -25,7 +25,7 @@ public class ExpoPushTicket implements JsonSerializable {
     private ExpoPushTicket.Details details = null;
 
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<>();
 
     @JsonProperty("status")
     public String getStatus() {
@@ -81,11 +81,10 @@ public class ExpoPushTicket implements JsonSerializable {
             }
         }
         jsonGenerator.writeEndObject();
-        return;
     }
 
     @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
+    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) {
         throw new UnsupportedOperationException("serializeWithType() not implemented.");
     }
 
@@ -117,7 +116,7 @@ public class ExpoPushTicket implements JsonSerializable {
         @JsonProperty("sentAt")
         private Integer sentAt;
         @JsonIgnore
-        private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+        private final Map<String, Object> additionalProperties = new HashMap<>();
 
         @JsonProperty("error")
         public String getError() {

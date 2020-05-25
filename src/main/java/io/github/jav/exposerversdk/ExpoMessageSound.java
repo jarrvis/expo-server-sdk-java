@@ -82,11 +82,10 @@ public class ExpoMessageSound implements JsonSerializable {
             return;
         }
         jsonGenerator.writeNull();
-        return;
     }
 
     @Override
-    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) throws IOException {
+    public void serializeWithType(JsonGenerator jsonGenerator, SerializerProvider serializerProvider, TypeSerializer typeSerializer) {
         throw new UnsupportedOperationException("serializeWithType() not implemented.");
     }
 }
